@@ -1,0 +1,7 @@
+.DS_Store
+venv
+/login.png
+.idea/*
+**/__pycache__
+!.idea/runConfigurations
+.vscode
