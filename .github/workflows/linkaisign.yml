@@ -1,0 +1,24 @@
+name: linkai-sign
+on:
+  schedule:
+    - cron: 11 22 * * *
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: "Asia/Shanghai"
+      - name: Install requirements
+        run: |
+          pip3 install -r ./requirements.txt
+      - name: Run sign
+        run: |
+          python3 ./main.py
+        env:
+          Authorization: ${{ secrets.Authorization }}
+          BARK_DEVICEKEY: ${{ secrets.BARK_DEVICEKEY }}
+          BARK_ICON: ${{ secrets.BARK_ICON }}
+      - uses: gautamkrishnar/keepalive-workflow@master
