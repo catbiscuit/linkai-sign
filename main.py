@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import random
+import re
 import time
 
 import requests
@@ -72,9 +73,12 @@ def sign(token, bark_deviceKey, bark_icon):
         title = 'Link.AI-签到结果'
         message = ''
 
+        message_all = []
+
         # 前面拼接jwt的过期时间
         date_time = datetime.datetime.fromtimestamp(timestamp)
         formatted_date = date_time.strftime('%Y-%m-%d %H:%M:%S')
+        message_all.append('jwt.exp：' + formatted_date + '。' + '\n')
 
         # 比较时间戳与当前时间的关系
         if timestamp > current_timestamp:
@@ -88,20 +92,22 @@ def sign(token, bark_deviceKey, bark_icon):
             print(response.text)
 
             if "success" in response.text:
-                message = '成功签到'
+                message_all.append('签到成功！' + '\n')
             elif "今日已签到" in response.text:
-                message = '今日已签到，请明日再来！'
+                message_all.append('今日已签到，请明日再来！' + '\n')
             elif "401" in response.text:
-                message = 'jwt校验失败，请检查'
+                message_all.append('jwt校验失败，请检查！' + '\n')
             else:
                 if len(response.text) > 100:
-                    message = response.text[:100]
+                    message_all.append(response.text[:100] + '\n')
                 else:
-                    message = response.text
-
-            message = 'jwt.exp：' + formatted_date + '。' + message
+                    message_all.append(response.text + '\n')
         elif timestamp <= current_timestamp:
-            message = 'jwt.exp：' + formatted_date + '。请重新登录后更新！'
+            message_all.append('请重新登录并更新Github中token的值！' + '\n')
+
+        message_all = '\n'.join(message_all)
+        message_all = re.sub('\n+', '\n', message_all).rstrip('\n')
+        message = message_all
 
         bark(bark_deviceKey, title, message, bark_icon)
 
