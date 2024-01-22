@@ -94,6 +94,11 @@ def sign(token, bark_deviceKey, bark_icon):
                     message = response.text[:100]
                 else:
                     message = response.text
+
+            # 前面拼接jwt的过期时间
+            date_time = datetime.datetime.fromtimestamp(timestamp)
+            formatted_date = date_time.strftime('%Y-%m-%d %H:%M:%S')
+            message = 'jwt.exp：' + formatted_date + '。' + message
         elif timestamp <= current_timestamp:
             message = 'jwt的exp已过期，请重新登录后更新'
 
