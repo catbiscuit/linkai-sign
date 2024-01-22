@@ -107,7 +107,7 @@ def main():
     bark_device_key = os.environ.get('BARK_DEVICEKEY')
     bark_icon = os.environ.get('BARK_ICON')
 
-    wait = random.randint(1, 2)
+    wait = random.randint(3, 159)
     time.sleep(wait)
 
     authorization = os.environ.get('Authorization')
