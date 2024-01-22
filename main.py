@@ -72,6 +72,10 @@ def sign(token, bark_deviceKey, bark_icon):
         title = 'Link.AI-签到结果'
         message = ''
 
+        # 前面拼接jwt的过期时间
+        date_time = datetime.datetime.fromtimestamp(timestamp)
+        formatted_date = date_time.strftime('%Y-%m-%d %H:%M:%S')
+
         # 比较时间戳与当前时间的关系
         if timestamp > current_timestamp:
             url = 'https://link-ai.tech/api/chat/web/app/user/sign/in'
@@ -95,12 +99,9 @@ def sign(token, bark_deviceKey, bark_icon):
                 else:
                     message = response.text
 
-            # 前面拼接jwt的过期时间
-            date_time = datetime.datetime.fromtimestamp(timestamp)
-            formatted_date = date_time.strftime('%Y-%m-%d %H:%M:%S')
             message = 'jwt.exp：' + formatted_date + '。' + message
         elif timestamp <= current_timestamp:
-            message = 'jwt的exp已过期，请重新登录后更新'
+            message = 'jwt.exp：' + formatted_date + '。请重新登录后更新！'
 
         bark(bark_deviceKey, title, message, bark_icon)
 
