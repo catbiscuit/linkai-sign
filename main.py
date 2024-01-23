@@ -91,10 +91,10 @@ def sign(token, bark_deviceKey, bark_icon):
 
             print(response.text)
 
-            if "success" in response.text:
-                message_all.append('签到成功！' + '\n')
-            elif "今日已签到" in response.text:
+            if "今日已签到" in response.text:
                 message_all.append('今日已签到，请明日再来！' + '\n')
+            elif "success" in response.text:
+                message_all.append('签到成功！' + '\n')
             elif "401" in response.text:
                 message_all.append('jwt校验失败，请检查！' + '\n')
             else:
