@@ -1,4 +1,11 @@
 # 如何使用？ 
+
+0、前言
+
+2024年3月19日08:43:15
+
+目前我是使用微信扫码登录的，获取的Authorization的值有效期只有7天。
+
 1、Fork项目到自己的仓库
 
 2、点击Settings -> 点击选项卡 Secrets and variables -> 点击Actions -> New repository secret
