@@ -53,76 +53,82 @@ def decode_base64(data):
 
 def sign(token, bark_deviceKey, bark_icon):
     if not token:
-        token = ''
+        print('不执行签到1,token为null')
+        return -1
 
-    if len(token) > 0:
-        print('有token，需要执行签到')
+    token = token.strip()
+    if len(token) <= 0:
+        print('不执行签到2,token为空')
+        return -2
 
-        many = token.split('.')
-        pay = many[1]
-        old = decode_base64(pay + '==')
-        res = json.loads(old)
+    if '.' not in token:
+        print('不执行签到3,token格式错误，未包含.')
+        return -3
 
-        # jwt的过期时间
-        timestamp = res['exp']
+    print('有token，需要执行签到')
 
-        # 获取当前时间并转换为timestamp格式
-        current_time = datetime.datetime.now()
-        current_timestamp = int(current_time.timestamp())
+    many = token.split('.')
+    pay = many[1]
+    old = decode_base64(pay + '==')
+    res = json.loads(old)
 
-        title = 'Link.AI-签到结果'
-        message = ''
+    # jwt的过期时间
+    timestamp = res['exp']
 
-        message_all = []
+    # 获取当前时间并转换为timestamp格式
+    current_time = datetime.datetime.now()
+    current_timestamp = int(current_time.timestamp())
 
-        # 前面拼接jwt的过期时间
-        date_time = datetime.datetime.fromtimestamp(timestamp)
-        formatted_date = date_time.strftime('%Y-%m-%d %H:%M:%S')
-        message_all.append('jwt.exp：' + formatted_date + '。' + '\n')
+    title = 'Link.AI-签到结果'
+    message = ''
 
-        # 比较时间戳与当前时间的关系
-        if timestamp > current_timestamp:
-            url = 'https://link-ai.tech/api/chat/web/app/user/sign/in'
-            headers = {
-                'Authorization': 'Bearer ' + token,
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
-            response = requests.get(url, headers=headers)
+    message_all = []
 
-            print(response.text)
+    # 前面拼接jwt的过期时间
+    date_time = datetime.datetime.fromtimestamp(timestamp)
+    formatted_date = date_time.strftime('%Y-%m-%d %H:%M:%S')
+    message_all.append('jwt.exp：' + formatted_date + '。' + '\n')
 
-            if "今日已签到" in response.text:
-                message_all.append('今日已签到，请明日再来！' + '\n')
-            elif "success" in response.text:
-                message_all.append('签到成功！' + '\n')
-            elif "401" in response.text:
-                message_all.append('jwt校验失败，请检查！' + '\n')
+    # 比较时间戳与当前时间的关系
+    if timestamp > current_timestamp:
+        url = 'https://link-ai.tech/api/chat/web/app/user/sign/in'
+        headers = {
+            'Authorization': 'Bearer ' + token,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers)
+
+        print(response.text)
+
+        if "今日已签到" in response.text:
+            message_all.append('今日已签到，请明日再来！' + '\n')
+        elif "success" in response.text:
+            message_all.append('签到成功！' + '\n')
+        elif "401" in response.text:
+            message_all.append('jwt校验失败，请检查！' + '\n')
+        else:
+            if len(response.text) > 100:
+                message_all.append(response.text[:100] + '\n')
             else:
-                if len(response.text) > 100:
-                    message_all.append(response.text[:100] + '\n')
-                else:
-                    message_all.append(response.text + '\n')
-        elif timestamp <= current_timestamp:
-            message_all.append('请重新登录并更新Github中token的值！' + '\n')
+                message_all.append(response.text + '\n')
+    elif timestamp <= current_timestamp:
+        message_all.append('请重新登录并更新Github中token的值！' + '\n')
 
-        message_all = '\n'.join(message_all)
-        message_all = re.sub('\n+', '\n', message_all).rstrip('\n')
-        message = message_all
+    message_all = '\n'.join(message_all)
+    message_all = re.sub('\n+', '\n', message_all).rstrip('\n')
+    message = message_all
 
-        bark(bark_deviceKey, title, message, bark_icon)
-
-    else:
-        print('不执行签到')
+    bark(bark_deviceKey, title, message, bark_icon)
 
 
 def main():
     bark_device_key = os.environ.get('BARK_DEVICEKEY')
     bark_icon = os.environ.get('BARK_ICON')
+    authorization = os.environ.get('Authorization')
 
-    wait = random.randint(3, 159)
+    wait = random.randint(3, 8)
     time.sleep(wait)
 
-    authorization = os.environ.get('Authorization')
     sign(authorization, bark_device_key, bark_icon)
 
     print('finish')
